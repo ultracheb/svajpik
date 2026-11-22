@@ -208,9 +208,10 @@ function decide(t,slot,j,i,v){
   t.style.transition='transform .22s, opacity .22s';
   t.style.transform=`translate(${v*500}px,0) rotate(${v*25}deg)`; t.style.opacity=0;
   vote(j,i,v);
-  setTimeout(()=>{ fillSlot(slot,j,i); if(j===cur && !isOpen(j)) setTimeout(advance,250); },200);
+  setTimeout(()=>{ fillSlot(slot,j,i); if(j===cur && !isOpen(j)) setTimeout(()=>advance(j),250); },200);
 }
-function advance(){ cur=nextOpen(cur+1); render(); }
+// j: the job that just got finished. Several tiles finish together on "✕ усе"/"✓ усе", so only the first call may move on
+function advance(j){ if(j!==undefined && j!==cur) return; cur=nextOpen(0); render(); }
 function skipJob(){
   if(cur>=jobs.length) return;
   [0,1,2,3].forEach(i=>{ if(!vget(key(cur,i))) votes[key(cur,i)]=[2,Date.now()]; });
