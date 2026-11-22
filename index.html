@@ -7,33 +7,41 @@
 <style>
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 html,body{margin:0;height:100%;background:#111;color:#eee;font:15px system-ui,sans-serif;overscroll-behavior:none;overflow:hidden}
-#app{height:100%;display:flex;flex-direction:column;padding:env(safe-area-inset-top) 10px env(safe-area-inset-bottom)}
-header{display:flex;align-items:center;gap:8px;padding:8px 2px;font-size:14px;color:#aaa}
-header .grow{flex:1}
 button{font:inherit;color:#eee;background:#2a2a2a;border:0;border-radius:10px;padding:10px 14px}
-button:active{background:#3a3a3a}
-.dot{display:inline-block;width:9px;height:9px;border-radius:50%;background:#555;margin-right:2px}
+button:active{filter:brightness(1.3)}
+#top{position:fixed;top:0;left:0;right:0;z-index:4;display:flex;align-items:center;gap:8px;padding:calc(env(safe-area-inset-top) + 6px) 10px 14px;font-size:14px;color:#aaa;background:linear-gradient(#111 55%,#1110)}
+#top .grow{flex:1}
+#top button{padding:7px 12px}
+.dot{display:inline-block;width:9px;height:9px;border-radius:50%;background:#555}
 .dot.ok{background:#4ade80}.dot.busy{background:#facc15}.dot.err{background:#f87171}
-.bar{height:3px;background:#2a2a2a;border-radius:2px;overflow:hidden;margin-bottom:8px}
-.bar i{display:block;height:100%;background:#4ade80;width:0}
-#prompt{font-size:12px;color:#888;padding:0 2px 6px;max-height:2.6em;overflow:hidden}
-#stage{flex:1;min-height:0;display:flex;align-items:center;justify-content:center}
-#grid{--ar:1;display:grid;grid-template-columns:1fr 1fr;gap:8px;width:100%;max-width:calc((100vh - 230px)*var(--ar))}
-#grid.empty{display:block;max-width:none}
-.slot{aspect-ratio:var(--ar);position:relative;border-radius:10px;background:#1b1b1b;overflow:hidden}
-.tile{position:absolute;inset:0;touch-action:none;user-select:none;-webkit-user-select:none;cursor:grab;will-change:transform}
-.tile img{width:100%;height:100%;object-fit:cover;display:block;pointer-events:none;-webkit-user-drag:none}
-.tile .stamp{position:absolute;top:8px;font-weight:800;font-size:22px;padding:2px 8px;border:3px solid;border-radius:8px;opacity:0;transform:rotate(-12deg);background:#0006}
-.stamp.yes{left:8px;color:#4ade80}.stamp.no{right:8px;color:#f87171;transform:rotate(12deg)}
-.slot .done{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:40px;pointer-events:none}
-.slot.yes{outline:3px solid #4ade80;outline-offset:-3px}
-.slot.no{opacity:.25}
-.slot.yes img,.slot.no img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
-.slot .redo{position:absolute;inset:0;background:none;padding:0;border-radius:0}
-.actions{display:flex;gap:8px;padding:10px 0;justify-content:center}
-.actions button{flex:1;font-size:16px}
-.actions .no{background:#4a1f1f}.actions .yes{background:#1f4a2c}
-.overlay{position:fixed;inset:0;background:#111;display:none;flex-direction:column;padding:env(safe-area-inset-top) 12px env(safe-area-inset-bottom);z-index:5}
+
+#feed{position:fixed;inset:0;overflow-y:scroll;scroll-snap-type:y mandatory;overscroll-behavior:contain;scrollbar-width:none}
+#feed::-webkit-scrollbar{display:none}
+.reel{height:100vh;height:100dvh;scroll-snap-align:start;scroll-snap-stop:always;display:flex;flex-direction:column;align-items:center;padding:calc(env(safe-area-inset-top) + 44px) 10px calc(env(safe-area-inset-bottom) + 10px)}
+.rp{font-size:12px;color:#888;height:2.7em;line-height:1.35;overflow:hidden;width:100%;max-width:640px;padding:0 2px}
+.tiles{--ar:1;margin:auto 0;width:100%}
+.reel.grid .tiles{display:grid;grid-template-columns:1fr 1fr;gap:8px;max-width:calc((100vh - 215px)*var(--ar));max-width:calc((100dvh - 215px)*var(--ar))}
+.reel.car .tiles{display:flex;gap:10px;overflow-x:auto;scroll-snap-type:x mandatory;padding:0 9vw;scrollbar-width:none}
+.reel.car .tiles::-webkit-scrollbar{display:none}
+.reel.car .tile{flex:0 0 auto;width:min(82vw,calc((100dvh - 215px)*var(--ar)));scroll-snap-align:center}
+.tile{position:relative;aspect-ratio:var(--ar);border-radius:12px;background:#1b1b1b;overflow:hidden;cursor:pointer}
+.tile img{width:100%;height:100%;object-fit:cover;display:block;transition:opacity .15s}
+.tile .ix{position:absolute;top:6px;left:8px;font-size:12px;color:#fff;background:#0007;border-radius:8px;padding:1px 7px}
+.tile .tb button{position:absolute;bottom:8px;width:46px;height:46px;border-radius:50%;padding:0;font-size:21px;background:#000a;color:#fff;display:flex;align-items:center;justify-content:center}
+.tile .bn{left:8px}.tile .by{right:8px}
+.tile.yes{outline:3px solid #4ade80;outline-offset:-3px}
+.tile.yes .by{background:#16a34a}
+.tile.no img{opacity:.3}
+.tile.no .bn{background:#dc2626}
+.rbar{display:flex;align-items:center;gap:8px;width:100%;max-width:640px;padding-top:10px}
+.rbar button{flex:1;font-size:16px}
+.rbar .no{background:#4a1f1f}.rbar .yes{background:#1f4a2c}
+.dots{display:flex;gap:6px;padding:0 4px}
+.dots i{width:9px;height:9px;border-radius:50%;background:#444;display:block}
+.dots i.yes{background:#4ade80}.dots i.no{background:#f87171}
+.empty{margin:auto;text-align:center;color:#888;padding:40px 10px;line-height:1.6}
+
+.overlay{position:fixed;inset:0;background:#111;display:none;flex-direction:column;padding:env(safe-area-inset-top) 12px env(safe-area-inset-bottom);z-index:6}
 .overlay.on{display:flex}
 .overlay .head{display:flex;gap:8px;align-items:center;padding:10px 0}
 #items{flex:1;overflow:auto;display:grid;grid-template-columns:repeat(auto-fill,minmax(110px,1fr));gap:8px;align-content:start}
@@ -42,35 +50,32 @@ button:active{background:#3a3a3a}
 .item .row{display:flex;justify-content:space-between;align-items:center;padding:4px 6px;gap:4px}
 .item a{color:#7cb8ff;text-decoration:none}
 .item .x{background:none;padding:2px 6px;color:#f87171}
-#lb{position:fixed;inset:0;background:#000e;display:none;flex-direction:column;align-items:center;justify-content:center;z-index:9;gap:10px;padding:10px}
+#lb{position:fixed;inset:0;background:#000e;display:none;flex-direction:column;align-items:center;justify-content:center;z-index:9;gap:12px;padding:10px}
 #lb.on{display:flex}#lb img{max-width:100%;max-height:78vh;object-fit:contain}
-#lb .actions{width:100%;max-width:500px}
+#lb .bar{display:flex;gap:8px;width:100%;max-width:500px}#lb .bar button{flex:1;font-size:18px}
+#lb .no{background:#4a1f1f}#lb .yes{background:#1f4a2c}
+#pos{cursor:pointer;padding:6px 4px;text-decoration:underline dotted #666;text-underline-offset:4px}
+.modal{position:fixed;inset:0;background:#000b;display:none;align-items:center;justify-content:center;z-index:8}.modal.on{display:flex}
+.card{background:#1b1b1b;border-radius:14px;padding:16px;width:min(92vw,360px);display:flex;flex-direction:column;gap:10px}
+.card input{width:100%;background:#111;color:#eee;border:1px solid #333;border-radius:8px;padding:12px;font:inherit;font-size:20px;text-align:center}
+.card .row{display:flex;gap:8px}.card .row button{flex:1;padding:10px 8px;font-size:14px}
+.card .go{background:#2f5d8a;font-size:16px}
 #toast{position:fixed;left:50%;bottom:90px;transform:translateX(-50%);background:#333;padding:8px 14px;border-radius:20px;opacity:0;transition:.2s;pointer-events:none;z-index:20}
 #toast.on{opacity:1}
-.empty{text-align:center;color:#888;padding:40px 10px}
 #setup label{display:block;color:#aaa;font-size:13px;margin:14px 0 4px}
-#setup input{width:100%;background:#1b1b1b;color:#eee;border:1px solid #333;border-radius:8px;padding:10px;font:inherit}
+#setup input[type=text],#setup input[type=password]{width:100%;background:#1b1b1b;color:#eee;border:1px solid #333;border-radius:8px;padding:10px;font:inherit}
 #setup .note{color:#777;font-size:12px;margin-top:10px;line-height:1.4}
+.seg{display:flex;gap:8px}.seg button{flex:1}.seg button.on{background:#2f5d8a}
 </style>
 </head>
 <body>
-<div id="app">
-  <header>
-    <span class="dot" id="dot"></span><span id="pos"></span><span class="grow"></span>
-    <span id="cnt"></span>
-    <button id="btnSet">⚙</button>
-    <button id="btnList">Спіс</button>
-  </header>
-  <div class="bar"><i id="prog"></i></div>
-  <div id="prompt"></div>
-  <div id="stage"><div id="grid"></div></div>
-  <div class="actions">
-    <button id="undo">↶</button>
-    <button class="no" id="allNo">✕ усе</button>
-    <button class="yes" id="allYes">✓ усе</button>
-    <button id="skip">Далей ›</button>
-  </div>
+<div id="top">
+  <span class="dot" id="dot"></span><span id="pos"></span><span class="grow"></span>
+  <span id="cnt"></span>
+  <button id="btnSet">⚙</button>
+  <button id="btnList">Спіс</button>
 </div>
+<div id="feed"></div>
 
 <div id="list" class="overlay">
   <div class="head">
@@ -84,15 +89,26 @@ button:active{background:#3a3a3a}
 
 <div id="setup" class="overlay">
   <div class="head"><button id="setBack">← Назад</button><span style="flex:1"></span><span id="syncStatus" style="color:#aaa"></span></div>
+  <label>Выгляд 4 карцінак</label>
+  <div class="seg"><button id="lGrid">2×2 сетка</button><button id="lCar">4 буйныя ў радок</button></div>
+  <label>Пасля 4 галасоў</label>
+  <div class="seg"><button id="aOff">Заставацца</button><button id="aOn">Аўтаперагорт</button></div>
   <label>GitHub токен (з доступам да gist)</label><input id="sToken" type="password" autocomplete="off">
-  <label>ID гіста (пуста = створыцца новы)</label><input id="sGist" autocomplete="off">
+  <label>ID гіста (пуста = створыцца новы)</label><input id="sGist" type="text" autocomplete="off">
   <div style="display:flex;gap:8px;margin-top:16px"><button id="sSave" style="flex:1">Захаваць</button><button id="sShare" style="flex:1">Спасылка для іншых девайсаў</button></div>
   <div class="note">Дызайны ляжаць у Midjourney, тут толькі jobId і твае галасы. Яны жывуць у прыватным гісце. Спасылка з #sync унутры дае доступ да гіста, не шар яе нікому.</div>
 </div>
 
-<div id="lb"><img id="lbImg"><div class="actions"><button class="no" id="lbNo">✕</button><button id="lbClose">Закрыць</button><button class="yes" id="lbYes">✓</button></div></div>
+<div id="lb"><img id="lbImg"><div class="bar"><button class="no" id="lbNo">✕</button><button id="lbClose">Закрыць</button><button class="yes" id="lbYes">♥</button></div></div>
+<div id="jump" class="modal"><div class="card">
+  <div id="jTitle" style="color:#aaa;text-align:center"></div>
+  <input id="jIn" type="number" inputmode="numeric" min="1">
+  <div class="row"><button class="go" id="jGo">Перайсці</button></div>
+  <div class="row"><button id="jStart">На пачатак</button><button id="jResume">Дзе спыніўся</button><button id="jEnd">У канец</button></div>
+</div></div>
 <div id="toast"></div>
 
+<script src="manifest.js" onerror="void 0"></script>
 <script>
 const $ = s => document.querySelector(s);
 const MJ = id => `https://www.midjourney.com/jobs/${id}`;
@@ -104,17 +120,19 @@ const store = {
 };
 
 let jobs = [];            // [{id,prompt}]
-let votes = {};           // "jobId:idx" -> [v, ts]   v: 1 like, -1 no, 2 skipped, 0 cleared
-let cur = 0, hist = [];
+let votes = {};           // "jobId:idx" -> [v, ts]   v: 1 like, -1 dislike, 2 skipped (old), 0 cleared
+let ui = Object.assign({layout:'grid',auto:false}, store.get('svajpik.ui',{}));
+let hist = [];
 const vget = k => votes[k] ? votes[k][0] : 0;
 const key = (j,i) => jobs[j].id + ':' + i;
 const isOpen = j => [0,1,2,3].some(i => !vget(key(j,i)));
-const nextOpen = from => { for(let j=from;j<jobs.length;j++) if(isOpen(j)) return j; return jobs.length; };
-
+const firstOpen = () => { for(let j=0;j<jobs.length;j++) if(isOpen(j)) return j; return jobs.length; };
+// where to continue: the last job that has any vote (like or dislike); stay on it if it is only partly rated, else the next one
+function resumeIndex(){ let last=-1; jobs.forEach((_,j)=>{ if([0,1,2,3].some(i=>vget(key(j,i)))) last=j; }); if(last<0) return 0; return isOpen(last)?last:Math.min(last+1,jobs.length); }
 function persist(){ store.set('svajpik.state',{jobs,votes}); }
 function toast(t){ const e=$('#toast'); e.textContent=t; e.classList.add('on'); clearTimeout(toast.t); toast.t=setTimeout(()=>e.classList.remove('on'),1600); }
 
-/* ---------- gist sync (same pattern as the other apps) ---------- */
+/* ---------- gist sync (same as the live app) ---------- */
 const FILE='svajpik.json';
 let cfg = store.get('svajpik.sync',{token:'',gist:''});
 if(!cfg.token){
@@ -148,9 +166,9 @@ async function sync(){
       const f=g.files&&g.files[FILE];
       let raw=f&&f.content; if(f&&f.truncated&&f.raw_url) raw=await (await fetch(f.raw_url,{cache:'no-store'})).text();
       const inc=raw?JSON.parse(raw):{jobs:[],votes:{}};
-      const before=sigOf(jobs,votes);
+      const before=sigOf(jobs,votes), beforeIds=jobs.map(j=>j.id).join();
       mergeState(inc); persist();
-      if(sigOf(jobs,votes)!==before){ cur=nextOpen(0); render(); }
+      if(jobs.map(j=>j.id).join()!==beforeIds) buildFeed(true); else if(sigOf(jobs,votes)!==before) refreshAll();
       if(sigOf(jobs,votes)!==sigOf(inc.jobs||[],inc.votes||{})) await gh('PATCH','/gists/'+cfg.gist,body());
     }
     store.set('svajpik.sync',cfg); setDot('ok');
@@ -159,83 +177,89 @@ async function sync(){
 }
 function schedulePush(){ if(!cfg.token) return; clearTimeout(pushT); pushT=setTimeout(sync,800); }
 
-/* ---------- voting ---------- */
-function vote(j,i,v){
-  const k=key(j,i); votes[k]=[v,Date.now()]; if(v) hist.push(k);
-  persist(); updateHeader(); schedulePush();
-}
+/* ---------- feed (reels) ---------- */
+const feed = $('#feed');
+const io = new IntersectionObserver(es=>es.forEach(e=>{
+  if(e.isIntersecting){ e.target.querySelectorAll('img[data-src]').forEach(im=>{ im.src=im.dataset.src; im.removeAttribute('data-src'); }); io.unobserve(e.target); }
+}),{root:feed,rootMargin:'150% 0px'});
 
-function render(){
-  const g=$('#grid'); g.innerHTML=''; g.className='';
-  if(!jobs.length){ g.className='empty'; g.innerHTML = cfg.token ? 'Пакуль няма дызайнаў.<br>Іх дадае Claude пасля генерацыі.' : 'Адкрый ⚙ і ўстаў токен,<br>або адкрый спасылку для сінхранізацыі.'; updateHeader(); return; }
-  if(cur>=jobs.length){ g.className='empty'; g.innerHTML='Усё прагледжана 🎉<br>Адкрый «Спіс»'; updateHeader(); return; }
-  const job=jobs[cur];
-  const pr=new Image(); pr.onload=()=>g.style.setProperty('--ar',pr.naturalWidth/pr.naturalHeight); pr.src=thumb(job.id,0);
-  [0,1,2,3].forEach(i=>{ const slot=document.createElement('div'); slot.className='slot'; g.appendChild(slot); fillSlot(slot,cur,i); });
-  updateHeader();
-}
-function fillSlot(slot,j,i){
-  const v=vget(key(j,i)), src=thumb(jobs[j].id,i);
-  slot.innerHTML=''; slot.className='slot'+(v===1?' yes':v?' no':'');
-  if(v){
-    slot.innerHTML=`<img src="${src}"><div class="done">${v===1?'♥':''}</div><button class="redo"></button>`;
-    slot.querySelector('.redo').onclick=()=>{ vote(j,i,0); fillSlot(slot,j,i); };
-    return;
+function makeReel(j){
+  const jb=jobs[j]; const s=document.createElement('section');
+  s.className='reel '+(ui.layout==='car'?'car':'grid'); s.dataset.j=j;
+  s.innerHTML='<div class="rp"></div><div class="tiles"></div><div class="rbar"><button class="no" data-all="-1">✕ усе</button><span class="dots"><i></i><i></i><i></i><i></i></span><button class="yes" data-all="1">♥ усе</button></div>';
+  s.querySelector('.rp').textContent=jb.prompt||'';
+  const tiles=s.querySelector('.tiles');
+  for(let i=0;i<4;i++){
+    const t=document.createElement('div'); t.className='tile'; t.dataset.i=i;
+    t.innerHTML=`<img alt="" data-src="${thumb(jb.id,i)}"><span class="ix">${i+1}</span><div class="tb"><button class="bn" data-v="-1">✕</button><button class="by" data-v="1">♥</button></div>`;
+    if(i===0) t.querySelector('img').addEventListener('load',e=>{ const im=e.target; if(im.naturalWidth) tiles.style.setProperty('--ar',im.naturalWidth/im.naturalHeight); });
+    tiles.appendChild(t);
+    paintTile(s,i,jb.id,j);
   }
-  const t=document.createElement('div'); t.className='tile';
-  t.innerHTML=`<img src="${src}"><div class="stamp yes">ТАК</div><div class="stamp no">НЕ</div>`;
-  slot.appendChild(t); attachDrag(t,slot,j,i);
+  io.observe(s); return s;
 }
-function attachDrag(t,slot,j,i){
-  let sx,sy,dx=0,dy=0,down=false,moved=false;
-  const yes=t.querySelector('.yes'), no=t.querySelector('.no');
-  t.onpointerdown=e=>{ down=true; moved=false; dx=dy=0; sx=e.clientX; sy=e.clientY; t.setPointerCapture(e.pointerId); t.style.transition='none'; };
-  t.onpointermove=e=>{
-    if(!down) return; dx=e.clientX-sx; dy=e.clientY-sy;
-    if(Math.abs(dx)>6||Math.abs(dy)>6) moved=true;
-    t.style.transform=`translate(${dx}px,${dy*0.4}px) rotate(${dx/18}deg)`;
-    yes.style.opacity=Math.max(0,Math.min(1,dx/80)); no.style.opacity=Math.max(0,Math.min(1,-dx/80));
-  };
-  t.onpointerup=t.onpointercancel=()=>{
-    if(!down) return; down=false;
-    if(!moved){ t.style.transform=''; openLB(j,i); return; }
-    if(Math.abs(dx)>70) decide(t,slot,j,i,dx>0?1:-1);
-    else{ t.style.transition='transform .2s'; t.style.transform=''; yes.style.opacity=no.style.opacity=0; }
-  };
-  t._decide=v=>decide(t,slot,j,i,v);
+function paintTile(s,i,id,j){
+  const v=vget(id+':'+i), t=s.querySelector(`.tile[data-i="${i}"]`);
+  t.classList.toggle('yes',v===1); t.classList.toggle('no',v===-1||v===2);
+  const d=s.querySelectorAll('.dots i')[i]; d.className = v===1?'yes':(v?'no':'');
 }
-function decide(t,slot,j,i,v){
-  t.style.transition='transform .22s, opacity .22s';
-  t.style.transform=`translate(${v*500}px,0) rotate(${v*25}deg)`; t.style.opacity=0;
-  vote(j,i,v);
-  setTimeout(()=>{ fillSlot(slot,j,i); if(j===cur && !isOpen(j)) setTimeout(()=>advance(j),250); },200);
+function buildFeed(keepPos){
+  const curId = keepPos && jobs[curIndex()] ? jobs[curIndex()].id : null;
+  io.disconnect(); feed.innerHTML='';
+  if(!jobs.length){
+    feed.innerHTML='<section class="reel"><div class="empty">'+(cfg.token?'Пакуль няма дызайнаў.<br>Іх дадае Claude пасля генерацыі.':'Адкрый ⚙ і ўстаў токен,<br>або адкрый спасылку для сінхранізацыі.')+'</div></section>';
+    updateHeader(); return;
+  }
+  jobs.forEach((_,j)=>feed.appendChild(makeReel(j)));
+  const end=document.createElement('section'); end.className='reel'; end.dataset.end='1';
+  end.innerHTML='<div class="empty">Гэта ўсё 🎉<br><span id="endInfo"></span></div>'; feed.appendChild(end);
+  let target = curId ? jobs.findIndex(j=>j.id===curId) : resumeIndex();
+  if(target<0) target=0;
+  goReel(target,false); updateHeader();
 }
-// j: the job that just got finished. Several tiles finish together on "✕ усе"/"✓ усе", so only the first call may move on
-function advance(j){ if(j!==undefined && j!==cur) return; cur=nextOpen(0); render(); }
-function skipJob(){
-  if(cur>=jobs.length) return;
-  [0,1,2,3].forEach(i=>{ if(!vget(key(cur,i))) votes[key(cur,i)]=[2,Date.now()]; });
-  persist(); schedulePush(); advance();
+function refreshAll(){ feed.querySelectorAll('.reel[data-j]').forEach(s=>{ const j=+s.dataset.j; for(let i=0;i<4;i++) paintTile(s,i,jobs[j].id,j); }); updateHeader(); }
+function curIndex(){ return Math.max(0,Math.round(feed.scrollTop/Math.max(1,feed.clientHeight))); }
+function goReel(j,smooth){ const el=feed.children[Math.max(0,Math.min(j,feed.children.length-1))]; if(el) feed.scrollTo({top:el.offsetTop,behavior:smooth?'smooth':'instant'}); }
+
+function setVote(j,i,v){
+  const id=jobs[j].id, k=id+':'+i;
+  const nv = vget(k)===v ? 0 : v;           // tapping the same button again clears the vote
+  votes[k]=[nv,Date.now()]; if(nv) hist.push(k);
+  persist(); schedulePush();
+  const s=feed.querySelector(`.reel[data-j="${j}"]`); if(s) paintTile(s,i,id,j);
+  updateHeader();
+  if(ui.auto && nv && !isOpen(j)) setTimeout(()=>{ if(curIndex()===j) goReel(j+1,true); },450);
 }
-function allVote(v){ document.querySelectorAll('.tile').forEach(t=>t._decide&&t._decide(v)); }
-function undo(){
-  const k=hist.pop(); if(!k){ toast('Няма што адмяняць'); return; }
-  votes[k]=[0,Date.now()]; persist(); schedulePush();
-  const j=jobs.findIndex(x=>x.id===k.split(':')[0]); if(j>=0){ cur=j; render(); }
+function setAll(j,v){
+  const stamp=Date.now(); [0,1,2,3].forEach(i=>{ votes[key(j,i)]=[v,stamp]; });
+  persist(); schedulePush();
+  const s=feed.querySelector(`.reel[data-j="${j}"]`); if(s) for(let i=0;i<4;i++) paintTile(s,i,jobs[j].id,j);
+  updateHeader();
+  if(ui.auto) setTimeout(()=>{ if(curIndex()===j) goReel(j+1,true); },450);
 }
+feed.addEventListener('click',e=>{
+  const reel=e.target.closest('.reel[data-j]'); if(!reel) return; const j=+reel.dataset.j;
+  const all=e.target.closest('[data-all]'); if(all){ setAll(j,+all.dataset.all); return; }
+  const tile=e.target.closest('.tile'); if(!tile) return; const i=+tile.dataset.i;
+  const b=e.target.closest('button[data-v]'); if(b){ setVote(j,i,+b.dataset.v); return; }
+  openLB(j,i);
+});
+feed.addEventListener('scroll',()=>updateHeader(),{passive:true});
+
 function updateHeader(){
-  const total=jobs.length, doneJobs=jobs.filter((_,j)=>!isOpen(j)).length;
-  $('#pos').textContent = total ? (cur<total?`Джоб ${cur+1} / ${total}`:'Гатова') : '';
+  const total=jobs.length, ci=curIndex(), open=jobs.filter((_,j)=>isOpen(j)).length;
+  $('#pos').textContent = total ? (ci<total?`${ci+1} / ${total}`:'Канец') : '';
   $('#cnt').textContent = `♥ ${Object.values(votes).filter(v=>v[0]===1).length}`;
-  $('#prompt').textContent = jobs[cur]?jobs[cur].prompt:'';
-  $('#prog').style.width = total?(doneJobs/total*100)+'%':'0';
+  const ei=$('#endInfo'); if(ei) ei.textContent = open?`Яшчэ не ацэнена: ${open}. Пракруці ўверх.`:'Усё ацэнена. Адкрый «Спіс».';
 }
 
 /* lightbox */
 let lbRef=null;
 function openLB(j,i){ lbRef=[j,i]; $('#lbImg').src=big(jobs[j].id,i); $('#lb').classList.add('on'); }
-function closeLB(){ $('#lb').classList.remove('on'); lbRef=null; }
-function lbVote(v){ if(!lbRef) return; const i=lbRef[1]; closeLB(); const t=document.querySelectorAll('.slot')[i].querySelector('.tile'); if(t&&t._decide) t._decide(v); }
+function closeLB(){ $('#lb').classList.remove('on'); lbRef=null; $('#lbImg').removeAttribute('src'); }
+function lbVote(v){ if(!lbRef) return; const [j,i]=lbRef; closeLB(); setVote(j,i,v); }
+$('#lbClose').onclick=closeLB; $('#lbYes').onclick=()=>lbVote(1); $('#lbNo').onclick=()=>lbVote(-1);
+$('#lb').addEventListener('click',e=>{ if(e.target.id==='lb') closeLB(); });
 
 /* list */
 function likedItems(){ const out=[]; jobs.forEach((jb,j)=>[0,1,2,3].forEach(i=>{ if(vget(key(j,i))===1) out.push({job:jb,i}); })); return out; }
@@ -243,19 +267,27 @@ const linkOf = it => `${MJ(it.job.id)}?index=${it.i}`;
 function showList(){
   const L=likedItems(); $('#listTitle').textContent=`Спадабалася: ${L.length}`;
   $('#items').innerHTML = L.length ? L.map(it=>`<div class="item"><a href="${linkOf(it)}" target="_blank" rel="noopener"><img src="${thumb(it.job.id,it.i)}"></a><div class="row"><a href="${linkOf(it)}" target="_blank" rel="noopener">MJ ↗</a><span>#${it.i+1}</span><button class="x" data-k="${it.job.id}:${it.i}">✕</button></div></div>`).join('') : '<div class="empty" style="grid-column:1/-1">Пакуль пуста</div>';
-  $('#items').querySelectorAll('.x').forEach(b=>b.onclick=()=>{ votes[b.dataset.k]=[0,Date.now()]; persist(); schedulePush(); showList(); updateHeader(); });
+  $('#items').querySelectorAll('.x').forEach(b=>b.onclick=()=>{ votes[b.dataset.k]=[0,Date.now()]; persist(); schedulePush(); showList(); });
   $('#list').classList.add('on');
 }
 async function copyText(s){ try{ await navigator.clipboard.writeText(s); return true; }catch(e){ const a=document.createElement('textarea'); a.value=s; document.body.appendChild(a); a.select(); const ok=document.execCommand('copy'); a.remove(); return ok; } }
+$('#btnList').onclick=showList; $('#back').onclick=()=>{ $('#list').classList.remove('on'); refreshAll(); };
+$('#copy').onclick=async()=>{ const L=likedItems(); await copyText(L.map(linkOf).join('\n')); toast(`Скапіявана: ${L.length}`); };
+$('#dl').onclick=()=>{ const L=likedItems().map(it=>({url:linkOf(it),job:it.job.id,index:it.i}));
+  const a=document.createElement('a'); a.href=URL.createObjectURL(new Blob([JSON.stringify(L,null,1)],{type:'application/json'})); a.download='liked.json'; a.click(); };
 
 /* setup / share */
+function paintSeg(){ $('#lGrid').classList.toggle('on',ui.layout!=='car'); $('#lCar').classList.toggle('on',ui.layout==='car'); $('#aOff').classList.toggle('on',!ui.auto); $('#aOn').classList.toggle('on',!!ui.auto); }
+function setUi(p){ Object.assign(ui,p); store.set('svajpik.ui',ui); paintSeg(); if('layout' in p) buildFeed(true); }
+$('#lGrid').onclick=()=>setUi({layout:'grid'}); $('#lCar').onclick=()=>setUi({layout:'car'});
+$('#aOff').onclick=()=>setUi({auto:false}); $('#aOn').onclick=()=>setUi({auto:true});
 function openSetup(){
-  $('#sToken').value=cfg.token||''; $('#sGist').value=cfg.gist||'';
+  $('#sToken').value=cfg.token||''; $('#sGist').value=cfg.gist||''; paintSeg();
   $('#syncStatus').textContent=!cfg.token?'сінхранізацыя выключана':($('#dot').classList.contains('err')?'памылка сінхранізацыі':'сінхранізавана');
   $('#setup').classList.add('on');
 }
 $('#btnSet').onclick=openSetup; $('#setBack').onclick=()=>$('#setup').classList.remove('on');
-$('#sSave').onclick=()=>{ cfg={token:$('#sToken').value.trim(),gist:$('#sGist').value.trim()}; store.set('svajpik.sync',cfg); $('#setup').classList.remove('on'); render(); sync(); };
+$('#sSave').onclick=()=>{ cfg={token:$('#sToken').value.trim(),gist:$('#sGist').value.trim()}; store.set('svajpik.sync',cfg); $('#setup').classList.remove('on'); sync(); };
 $('#sShare').onclick=async()=>{
   if(!cfg.token){ toast('Спачатку ўстаў токен'); return; }
   if(!cfg.gist) await sync();
@@ -265,27 +297,33 @@ $('#sShare').onclick=async()=>{
   try{ await navigator.clipboard.writeText(link); toast('Спасылка скапіявана'); }catch(e){ prompt('',link); }
 };
 
-$('#btnList').onclick=showList; $('#back').onclick=()=>{ $('#list').classList.remove('on'); render(); };
-$('#copy').onclick=async()=>{ const L=likedItems(); await copyText(L.map(linkOf).join('\n')); toast(`Скапіявана: ${L.length}`); };
-$('#dl').onclick=()=>{ const L=likedItems().map(it=>({url:linkOf(it),job:it.job.id,index:it.i}));
-  const a=document.createElement('a'); a.href=URL.createObjectURL(new Blob([JSON.stringify(L,null,1)],{type:'application/json'})); a.download='liked.json'; a.click(); };
-$('#undo').onclick=undo; $('#allNo').onclick=()=>allVote(-1); $('#allYes').onclick=()=>allVote(1); $('#skip').onclick=skipJob;
-$('#lbClose').onclick=closeLB; $('#lbYes').onclick=()=>lbVote(1); $('#lbNo').onclick=()=>lbVote(-1);
+/* jump to a job by number */
+function openJump(){ if(!jobs.length) return; $('#jTitle').textContent=`Нумар дызайну (1 – ${jobs.length})`; $('#jIn').value=Math.min(curIndex(),jobs.length-1)+1; $('#jump').classList.add('on'); setTimeout(()=>{ $('#jIn').focus(); $('#jIn').select(); },50); }
+function closeJump(){ $('#jump').classList.remove('on'); $('#jIn').blur(); }
+function jumpTo(j){ closeJump(); goReel(j,false); updateHeader(); }
+$('#pos').onclick=openJump;
+$('#jGo').onclick=()=>{ const n=parseInt($('#jIn').value,10); if(!n){ return; } jumpTo(Math.max(0,Math.min(jobs.length-1,n-1))); };
+$('#jIn').addEventListener('keydown',e=>{ if(e.key==='Enter') $('#jGo').click(); if(e.key==='Escape') closeJump(); });
+$('#jStart').onclick=()=>jumpTo(0); $('#jResume').onclick=()=>jumpTo(resumeIndex()); $('#jEnd').onclick=()=>jumpTo(jobs.length);
+$('#jump').addEventListener('click',e=>{ if(e.target.id==='jump') closeJump(); });
+
+/* keyboard (desktop): ↑↓ reel, 1-4 like, Shift+1-4 dislike, Q/W all dislike/like */
 document.addEventListener('keydown',e=>{
   if($('#lb').classList.contains('on')){ if(e.key==='Escape') closeLB(); if(e.key==='ArrowRight') lbVote(1); if(e.key==='ArrowLeft') lbVote(-1); return; }
-  if(e.target.tagName==='INPUT') return;
-  const t=document.querySelector('.tile');
-  if(e.key==='ArrowRight'&&t) t._decide(1);
-  else if(e.key==='ArrowLeft'&&t) t._decide(-1);
-  else if(e.key==='ArrowDown') skipJob();
-  else if(e.key==='z'||e.key==='Z') undo();
+  if(e.target.tagName==='INPUT'||document.querySelector('.overlay.on,.modal.on')) return;
+  const j=curIndex();
+  if(e.key==='ArrowDown'||e.key==='PageDown'){ e.preventDefault(); goReel(j+1,true); }
+  else if(e.key==='ArrowUp'||e.key==='PageUp'){ e.preventDefault(); goReel(j-1,true); }
+  else if(/^Digit[1-4]$/.test(e.code) && jobs[j]) setVote(j,+e.code.slice(5)-1,e.shiftKey?-1:1);
+  else if(e.key==='w'&&jobs[j]) setAll(j,1);
+  else if(e.key==='q'&&jobs[j]) setAll(j,-1);
 });
 
 /* API for Claude: add the jobs of a new Midjourney batch */
 window.svajpik = {
   async addJobs(list){ let n=0; const have=new Set(jobs.map(j=>j.id));
     list.forEach(j=>{ if(!have.has(j.id)){ jobs.push({id:j.id,prompt:(j.prompt||'').slice(0,160)}); have.add(j.id); n++; } });
-    persist(); cur=nextOpen(0); render(); await sync(); return {added:n,total:jobs.length,gist:cfg.gist,synced:$('#dot').classList.contains('ok')}; },
+    persist(); buildFeed(true); await sync(); return {added:n,total:jobs.length,gist:cfg.gist,synced:$('#dot').classList.contains('ok')}; },
   info(){ return {jobs:jobs.length,liked:likedItems().length,gist:cfg.gist,hasToken:!!cfg.token}; }
 };
 
@@ -295,7 +333,9 @@ window.svajpik = {
   const hm=location.hash.match(/sync=([^&]+)/);
   if(hm){ try{ const c=JSON.parse(atob(decodeURIComponent(hm[1]))); if(c.token&&c.gist){ cfg=c; store.set('svajpik.sync',cfg); setTimeout(()=>toast('Падключана'),300); } }catch(e){}
     history.replaceState(null,'',location.pathname+location.search); }
-  cur=nextOpen(0); render(); sync();
+  // local demo only: no data yet and a manifest.js lies next to the page
+  if(!jobs.length && !cfg.token && window.MANIFEST) jobs=window.MANIFEST.jobs.map(j=>({id:j.id,prompt:j.prompt}));
+  buildFeed(false); sync();
   document.addEventListener('visibilitychange',()=>{ if(document.visibilityState==='visible') sync(); });
 })();
 </script>
