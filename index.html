@@ -47,6 +47,7 @@ button:active{filter:brightness(1.3)}
 #items{flex:1;min-height:0;overflow:auto;display:grid;grid-template-columns:repeat(auto-fill,minmax(110px,1fr));grid-auto-rows:max-content;gap:6px;align-content:start}
 .item{position:relative;background:#1b1b1b;border-radius:8px;overflow:hidden;font-size:12px}
 .item .del{position:absolute;top:5px;right:5px;width:32px;height:32px;padding:0;border-radius:50%;background:#000b;color:#f87171;font-size:17px;line-height:32px;text-align:center}
+.item .go{position:absolute;bottom:5px;right:5px;height:32px;padding:0 10px;border-radius:16px;background:#2f5d8acc;color:#fff;font-size:14px;line-height:32px}
 .item .nn{position:absolute;left:5px;bottom:5px;background:#000a;border-radius:6px;padding:1px 6px;font-size:11px;color:#ddd;pointer-events:none}
 #undoDel{display:none}
 .item img{width:100%;aspect-ratio:1/1;object-fit:cover;display:block}
@@ -285,14 +286,15 @@ $('#lb').addEventListener('click',e=>{ if(e.target.id==='lb') closeLB(); });
 function likedItems(){ const out=[]; jobs.forEach((jb,j)=>[0,1,2,3].forEach(i=>{ if(vget(key(j,i))===1) out.push({job:jb,i}); })); return out; }
 const linkOf = it => `${MJ(it.job.id)}?index=${it.i}`;
 let delStack=[];
-function itemHTML(it){ const k=`${it.job.id}:${it.i}`; return `<div class="item" data-k="${k}"><a href="${linkOf(it)}" target="_blank" rel="noopener"><img src="${thumb(it.job.id,it.i)}" loading="lazy"></a><span class="nn">${jobs.indexOf(it.job)+1}·${it.i+1}</span><button class="del" data-k="${k}" aria-label="Выдаліць">✕</button></div>`; }
+function itemHTML(it){ const k=`${it.job.id}:${it.i}`; return `<div class="item" data-k="${k}"><a href="${linkOf(it)}" target="_blank" rel="noopener"><img src="${thumb(it.job.id,it.i)}" loading="lazy"></a><span class="nn">${jobs.indexOf(it.job)+1}·${it.i+1}</span><button class="del" data-k="${k}" aria-label="Выдаліць">✕</button><button class="go" data-k="${k}" data-u="${linkOf(it)}" aria-label="Адкрыць і выдаліць">↗✕</button></div>`; }
 function paintListTitle(){ $('#listTitle').textContent=`Спадабалася: ${likedItems().length}`; $('#undoDel').style.display=delStack.length?'inline-block':'none'; }
 function showList(){
   const L=likedItems(); delStack=[];
   $('#items').innerHTML = L.length ? L.map(itemHTML).join('') : '<div class="empty" style="grid-column:1/-1">Пакуль пуста</div>';
   paintListTitle(); $('#list').classList.add('on');
 }
-$('#items').addEventListener('click',e=>{ const b=e.target.closest('.del'); if(!b) return; e.preventDefault();
+$('#items').addEventListener('click',e=>{ const b=e.target.closest('.del,.go'); if(!b) return; e.preventDefault();
+  if(b.classList.contains('go')) window.open(b.dataset.u,'_blank','noopener');   // open on MJ, then drop from the list
   const k=b.dataset.k, old=votes[k]; delStack.push({k,old}); votes[k]=[0,Date.now()]; persist(); schedulePush();
   b.closest('.item').remove(); paintListTitle(); });
 $('#undoDel').onclick=()=>{ const d=delStack.pop(); if(!d) return; votes[d.k]=[1,Date.now()]; persist(); schedulePush(); showList0(d.k); };
