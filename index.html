@@ -44,8 +44,11 @@ button:active{filter:brightness(1.3)}
 .overlay{position:fixed;inset:0;background:#111;display:none;flex-direction:column;padding:env(safe-area-inset-top) 12px env(safe-area-inset-bottom);z-index:6}
 .overlay.on{display:flex}
 .overlay .head{display:flex;gap:8px;align-items:center;padding:10px 0}
-#items{flex:1;overflow:auto;display:grid;grid-template-columns:repeat(auto-fill,minmax(110px,1fr));gap:8px;align-content:start}
-.item{background:#1b1b1b;border-radius:8px;overflow:hidden;font-size:12px}
+#items{flex:1;min-height:0;overflow:auto;display:grid;grid-template-columns:repeat(auto-fill,minmax(110px,1fr));grid-auto-rows:max-content;gap:6px;align-content:start}
+.item{position:relative;background:#1b1b1b;border-radius:8px;overflow:hidden;font-size:12px}
+.item .del{position:absolute;top:5px;right:5px;width:32px;height:32px;padding:0;border-radius:50%;background:#000b;color:#f87171;font-size:17px;line-height:32px;text-align:center}
+.item .nn{position:absolute;left:5px;bottom:5px;background:#000a;border-radius:6px;padding:1px 6px;font-size:11px;color:#ddd;pointer-events:none}
+#undoDel{display:none}
 .item img{width:100%;aspect-ratio:1/1;object-fit:cover;display:block}
 .item .row{display:flex;justify-content:space-between;align-items:center;padding:4px 6px;gap:4px}
 .item a{color:#7cb8ff;text-decoration:none}
@@ -79,7 +82,7 @@ button:active{filter:brightness(1.3)}
 
 <div id="list" class="overlay">
   <div class="head">
-    <button id="back">← Назад</button><span style="flex:1"></span>
+    <button id="back">← Назад</button><button id="undoDel">↶ Вярнуць</button><span style="flex:1"></span>
     <button id="copy">Копіяваць лінкі</button>
     <button id="dl">JSON</button>
   </div>
@@ -281,12 +284,19 @@ $('#lb').addEventListener('click',e=>{ if(e.target.id==='lb') closeLB(); });
 /* list */
 function likedItems(){ const out=[]; jobs.forEach((jb,j)=>[0,1,2,3].forEach(i=>{ if(vget(key(j,i))===1) out.push({job:jb,i}); })); return out; }
 const linkOf = it => `${MJ(it.job.id)}?index=${it.i}`;
+let delStack=[];
+function itemHTML(it){ const k=`${it.job.id}:${it.i}`; return `<div class="item" data-k="${k}"><a href="${linkOf(it)}" target="_blank" rel="noopener"><img src="${thumb(it.job.id,it.i)}" loading="lazy"></a><span class="nn">${jobs.indexOf(it.job)+1}·${it.i+1}</span><button class="del" data-k="${k}" aria-label="Выдаліць">✕</button></div>`; }
+function paintListTitle(){ $('#listTitle').textContent=`Спадабалася: ${likedItems().length}`; $('#undoDel').style.display=delStack.length?'inline-block':'none'; }
 function showList(){
-  const L=likedItems(); $('#listTitle').textContent=`Спадабалася: ${L.length}`;
-  $('#items').innerHTML = L.length ? L.map(it=>`<div class="item"><a href="${linkOf(it)}" target="_blank" rel="noopener"><img src="${thumb(it.job.id,it.i)}"></a><div class="row"><a href="${linkOf(it)}" target="_blank" rel="noopener">MJ ↗</a><span>#${it.i+1}</span><button class="x" data-k="${it.job.id}:${it.i}">✕</button></div></div>`).join('') : '<div class="empty" style="grid-column:1/-1">Пакуль пуста</div>';
-  $('#items').querySelectorAll('.x').forEach(b=>b.onclick=()=>{ votes[b.dataset.k]=[0,Date.now()]; persist(); schedulePush(); showList(); });
-  $('#list').classList.add('on');
+  const L=likedItems(); delStack=[];
+  $('#items').innerHTML = L.length ? L.map(itemHTML).join('') : '<div class="empty" style="grid-column:1/-1">Пакуль пуста</div>';
+  paintListTitle(); $('#list').classList.add('on');
 }
+$('#items').addEventListener('click',e=>{ const b=e.target.closest('.del'); if(!b) return; e.preventDefault();
+  const k=b.dataset.k, old=votes[k]; delStack.push({k,old}); votes[k]=[0,Date.now()]; persist(); schedulePush();
+  b.closest('.item').remove(); paintListTitle(); });
+$('#undoDel').onclick=()=>{ const d=delStack.pop(); if(!d) return; votes[d.k]=[1,Date.now()]; persist(); schedulePush(); showList0(d.k); };
+function showList0(){ const keep=$('#items').scrollTop, st=delStack.slice(); showList(); delStack=st; paintListTitle(); $('#items').scrollTop=keep; }
 async function copyText(s){ try{ await navigator.clipboard.writeText(s); return true; }catch(e){ const a=document.createElement('textarea'); a.value=s; document.body.appendChild(a); a.select(); const ok=document.execCommand('copy'); a.remove(); return ok; } }
 $('#btnList').onclick=showList; $('#back').onclick=()=>{ $('#list').classList.remove('on'); refreshAll(); };
 $('#copy').onclick=async()=>{ const L=likedItems(); await copyText(L.map(linkOf).join('\n')); toast(`Скапіявана: ${L.length}`); };
